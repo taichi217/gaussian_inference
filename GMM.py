@@ -92,17 +92,17 @@ def gibbs_sampling(iter_num, N, K, X, mus, lamdas, pis, beta, m, w, nu, alpha) :
     lamdas_log :　各クラスタのサンプリングされた精度パラメータの記録
     pis_log :　各クラスタのサンプリングされた混合比率の記録
     """
-    mus_log = []
-    lamdas_log = []
-    pis_log = []
-    mus_log.append(mus)
-    lamdas_log.append(lamdas)
-    pis_log.append(pis)
+    mus_log = np.zeros((iter_num, K, 2), dtype = "float")
+    lamdas_log = np.zeros((iter_num, K, 2, 2), dtype = "float")
+    pis_log = np.zeros((iter_num, K), dtype = "float")
     mus_hat = mus
     lamdas_hat = lamdas
     pis_hat = pis
     for i in range(iter_num) :
         sn_new = []
+        mus_log[i] = mus_hat
+        lamdas_log[i] = lamdas_hat
+        pis_log[i] = pis_hat
         """
         カテゴリカル分布から，snをサンプリング
         """
@@ -114,18 +114,14 @@ def gibbs_sampling(iter_num, N, K, X, mus, lamdas, pis, beta, m, w, nu, alpha) :
             """
             lamdas_hat[k] = lamda_sampler(sn_new, k, beta, m, nu, w, X, N)
             mus_hat[k] = mu_sampler(sn_new, k, beta, m, lamdas_hat, X, N)
-
-        print(mus_hat)
-
-        lamdas_log.append(lamdas_hat)
         """
         ディリクレ分布から,piをサンプリング
         """
         pis_hat = pi_sampler(sn_new, K, alpha)[0]
-        pis_log.append(pis_hat)
-    # print(lamdas_hat)
-    # print(mus_hat)
-    # print(pis_hat)
+    print(lamdas_hat)
+    print(mus_hat)
+    print(pis_hat)
+
     return np.array(mus_log), np.array(lamdas_log), np.array(pis_log)
 
 
@@ -170,23 +166,48 @@ def main() :
 
 
 
-    mus_log, lamdas_log, pis_log = gibbs_sampling(50, N, K, obs, mus, lamdas, pis[0], beta, m, w, nu, alpha)
-    iter = [i for i in range(50)]
+    mus_log, lamdas_log, pis_log = gibbs_sampling(500, N, K, obs, mus, lamdas, pis[0], beta, m, w, nu, alpha)
+    iter = [i for i in range(500)]
     # for i in mus_log :
     #     print(i)
+    # print(mus_log)
+    mu1 = np.array([i[:1][0] for i in mus_log])
+    mu2 = np.array([i[:2][1] for i in mus_log])
+    mu3 = np.array([i[:3][2] for i in mus_log])
+    # print([i[0] for i in mu1])
 
+    fig11 = plt.figure()
+    plt.plot(iter, [i[0] for i in mu1])
+    plt.title("cluster1 mu x")
+    plt.savefig("./images/picture/cluster1_mu_x.png")
+    fig12 = plt.figure()
+    plt.plot(iter, [i[1] for i in mu1])
+    plt.title("cluster1 mu y")
+    plt.savefig("./images/picture/cluster1_mu_y.png")
 
+    fig21 = plt.figure()
+    plt.plot(iter, [i[0] for i in mu2], c = "orange")
+    plt.title("cluster2 mu x")
+    plt.savefig("./images/picture/cluster2_mu_x.png")
+    fig22 = plt.figure()
+    plt.plot(iter, [i[1] for i in mu2], c = "orange")
+    plt.title("cluster2 mu y")
+    plt.savefig("./images/picture/cluster2_mu_y.png")
 
+    fig31 = plt.figure()
+    plt.plot(iter, [i[0] for i in mu3], c = "green")
+    plt.title("cluster3 mu x")
+    plt.savefig("./images/picture/cluster3_mu_x.png")
+    fig32 = plt.figure()
+    plt.plot(iter, [i[1] for i in mu1], c = "green")
+    plt.title("cluster3 mu y")
+    plt.savefig("./images/picture/cluster3_mu_y.png")
 
-    # mu2
-    # mu3
-    # fig1 = plt.figure()
-    # plt.plot(iter, mus_log[:0])
-    # plt.title("mu_x")
-    # fig2 = plt.figure()
-    # plt.plot(iter, mus_log[:1])
-    # plt.plot("mu_y")
-    # plt.show()
+    data_fig = plt.figure()
+    plt.scatter(X1[:,0], X1[:,1])
+    plt.scatter(X2[:,0], X2[:,1], c = "orange")
+    plt.scatter(X3[:,0], X3[:,1], c = "green")
+    plt.savefig("./images/picture/plot_data")
 
 if __name__ == "__main__" :
     main()
