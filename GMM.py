@@ -98,11 +98,11 @@ def gibbs_sampling(iter_num, N, K, X, mus, lamdas, pis, beta, m, w, nu, alpha) :
     mus_log.append(mus)
     lamdas_log.append(lamdas)
     pis_log.append(pis)
+    mus_hat = mus
+    lamdas_hat = lamdas
+    pis_hat = pis
     for i in range(iter_num) :
         sn_new = []
-        mus_hat = mus
-        lamdas_hat = lamdas
-        pis_hat = pis
         """
         カテゴリカル分布から，snをサンプリング
         """
@@ -114,18 +114,19 @@ def gibbs_sampling(iter_num, N, K, X, mus, lamdas, pis, beta, m, w, nu, alpha) :
             """
             lamdas_hat[k] = lamda_sampler(sn_new, k, beta, m, nu, w, X, N)
             mus_hat[k] = mu_sampler(sn_new, k, beta, m, lamdas_hat, X, N)
-        mus_log.append(mus_hat)
+
+        print(mus_hat)
+
         lamdas_log.append(lamdas_hat)
         """
         ディリクレ分布から,piをサンプリング
         """
-        pis_hat = (pi_sampler(sn_new, K, alpha))
+        pis_hat = pi_sampler(sn_new, K, alpha)[0]
         pis_log.append(pis_hat)
-    print(lamdas_hat)
-    print(mus_hat)
-    print(pis_hat)
-
-    return mus_log, lamdas_log,
+    # print(lamdas_hat)
+    # print(mus_hat)
+    # print(pis_hat)
+    return np.array(mus_log), np.array(lamdas_log), np.array(pis_log)
 
 
 
@@ -169,10 +170,23 @@ def main() :
 
 
 
+    mus_log, lamdas_log, pis_log = gibbs_sampling(50, N, K, obs, mus, lamdas, pis[0], beta, m, w, nu, alpha)
+    iter = [i for i in range(50)]
+    # for i in mus_log :
+    #     print(i)
 
 
 
-    gibbs_sampling(200, N, K, obs, mus, lamdas, pis[0], beta, m, w, nu, alpha)
+
+    # mu2
+    # mu3
+    # fig1 = plt.figure()
+    # plt.plot(iter, mus_log[:0])
+    # plt.title("mu_x")
+    # fig2 = plt.figure()
+    # plt.plot(iter, mus_log[:1])
+    # plt.plot("mu_y")
+    # plt.show()
 
 if __name__ == "__main__" :
     main()
